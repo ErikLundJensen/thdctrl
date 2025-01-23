@@ -1,0 +1,9 @@
+machine:
+  install:
+    disk: /dev/nvme0n1
+    image: ghcr.io/siderolabs/installer:v1.9.2
+  network:
+    hostname: node1
+    interfaces:
+    - interface: eth0
+      dhcp: true

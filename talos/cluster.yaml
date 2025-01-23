@@ -1,0 +1,9 @@
+cluster:
+  clusterName: demo-1
+  allowSchedulingOnControlPlanes: true
+  network:
+    dnsDomain: demo-1-k8s.lelund.eu
+    cni:
+      name: none
+  proxy:
+    disabled: true

@@ -1,0 +1,33 @@
+apiVersion: lund.ai/v1alpha1
+kind: BareMetalAsset
+metadata:
+  name: <baremetalasset-machine>
+  namespace: <baremetalasset-namespace>
+spec:
+  bmc:
+    address: ipmi://<out_of_band_ip>:<port>
+    credentialsName: baremetalasset-machine-secret
+  bootMACAddress: "00:1B:44:11:3A:B7"
+  hardwareProfile: "hardwareProfile"
+  role: "<role>"
+  clusterName: "<cluster name>"
+  # Do not provision machine before image is set 
+  image: <iso-image-url>
+
+  talosNetwork:
+  - configRef: <secret> 
+  talosConfig:
+  - secretRef: <secret>
+
+status:
+  provisioned: true
+  state: provisioning
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: baremetalasset-machine-secret
+type: Opaque
+data:
+  username: <username>
+  password: <password>

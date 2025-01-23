@@ -1,0 +1,8 @@
+
+
+When in rescue mode, use SSH to install the OS, follow same guide as for Hetzner Cloud:
+https://www.talos.dev/v1.9/talos-guides/install/cloud-platforms/hetzner/#rescue-mode
+
+
+Features:
+Require encryption of all traffic between nodes in cluster
