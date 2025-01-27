@@ -1,0 +1,5 @@
+github.copilot.enable": {
+    "*": true,
+    "*-secrets.yaml": false,
+    "talos/gen/*": false,
+}

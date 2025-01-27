@@ -1,0 +1,25 @@
+
+hubble:
+  enabled: true
+  peerService:
+    clusterDomain: cluster.local
+  relay:
+    enabled: true
+    dialTimeout: 5s
+    retryTimeout: 5s
+  ui:
+    enabled: true
+    frontend:
+      server:
+        ipv6:
+          enabled: false
+  metrics:
+    enabled:
+      - "policy:sourceContext=workload-name|app|pod;destinationContext=workload-name|app|pod|dns;labelsContext=source_namespace,destination_namespace"
+      - "http:sourceContext=workload-name|app|pod;destinationContext=workload-name|app|pod|dns;labelsContext=source_namespace,destination_namespace"
+      - "grpc:sourceContext=workload-name|app|pod;destinationContext=workload-name|app|pod|dns;labelsContext=source_namespace,destination_namespace"
+  tls:
+    auto:
+      enabled: true
+      method: cronJob # generate certificates using hubble's hubblecertgen (check the hubblecertgen section for more details in cilium's helm values file)
+      certValidityDuration: 1095

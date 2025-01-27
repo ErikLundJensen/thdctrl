@@ -1,3 +1,4 @@
 talos/gen/*
 /thdctrl
 .vscode/launch.json
+talos/hetzner-secrets.yaml

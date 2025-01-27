@@ -1,0 +1,70 @@
+Configuration of vswitch, LB and dedicated Server
+
+  In order to use the cloud network from your dedicated server you need to configure it to:
+
+  Create a private network interface with correct vlan id and set mtu to 1,400 bytes
+
+  Use a unique IP address from the vSwitch subnet 10.250.250.16/28
+
+  Add a route for the whole cloud network 10.250.250.0/24 pointing to gateway 10.250.250.17
+  For example, if the private IP address of your dedicated server is 10.250.250.18, its network interface is called enp0s31f6, and the VLAN ID of the linked vSwitch is 4000, then a temporary configuration on your dedicated server would be:
+
+  Create Interface
+  ip link add link enp0s31f6 name enp0s31f6.4000 type vlan id 4000
+  ip link set enp0s31f6.4000 mtu 1400
+  ip link set dev enp0s31f6.4000 up
+  Set IP address and route
+  ip addr add 10.250.250.18/28 dev enp0s31f6.4000
+  ip route add 10.250.250.0/24 via 10.250.250.17
+
+  Please note that this configuration will not persist across reboots. For more information visit our Docs.
+
+Inbound traffic:
+  vSwitch + Load Balanccer + Privat network (costs and limits and complexity, )
+  DNS load balancing (TTL must be short, requires management of DNS entries, failover takes TTL sec)
+
+Switch comments:
+	higher price for IPv4 addresses
+	"For this vSwitch, traffic usage of 1 TB/month (outgoing) is free. Additional outgoing traffic will be charged at € 1.25 (incl. 25 % VAT) per additional TB."
+	Load Balancer: 20TB per month (note, image downloads also counts in that traffic)
+	Alterative is DNS load balancing if we can control the domains.
+
+  Consider using a vSwitch for inter-node communication. That would require two IP addresses - one for the intenal and one for external
+    An extra IP cost €2.13 pr month.
+  Consider using IPv6 for inter-node communication.
+
+Server auction is not available Saturday evening.
+
+Enable encryption in Cilium with wireguard
+  https://docs.cilium.io/en/latest/security/network/encryption-wireguard/
+  Multi-cluster, remember to open UDP port 51871
+
+The configuration must contain list of all IP addresses 
+
+
+Bandwidth manager:
+https://docs.cilium.io/en/stable/operations/performance/tuning/#bandwidth-manager
+
+Using Private network (for vSwitch):
+This will tell the machine that 10.0.0.1 is behind that eth0 link:
+machine:
+  network:
+    interfaces:
+      - interface: eth0
+        dhcp: true
+        mtu: 8765
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.0.1
+         - network: 10.0.0.1/32
+
+
+Network conclusion of 27/1
+* vSwitch with private network could be tested, however, no one has proven that it works.
+* Hubble-peer can't connect to cilium-agent at port 4245. Firewall has been disabled, maybe disable-sip-validation would work around.
+  Have not found the reason why it can't connect.
+  Try to deploy more workload to the cluster to see if there is some generic network problem.
+
+TODO:
+* enable encryption
+* Does Cilium support host network policies? Is unencrypted traffic allowed?

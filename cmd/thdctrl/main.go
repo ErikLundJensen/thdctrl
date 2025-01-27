@@ -1,5 +1,10 @@
 package main
 
+// TODO new features
+//  Get disk name during SSH sessions (e.g. if disk is not specified in the command line).
+//  or add command to list disks and sizes.
+
+
 import (
     "flag"
     "fmt"
