@@ -13,7 +13,6 @@ type cmdFlags struct {
 		skipReboot bool
 		enableRescueSystem bool
 		disk string
-		serverNumber int
 		version string
 		image string
 }
