@@ -8,8 +8,14 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func EstablishSSHSession(host, port, user, password string) (*ssh.Session, error) {
-	config := &ssh.ClientConfig{
+type SSHClient struct {
+	Host, Port string
+	Session *ssh.Session
+	Config *ssh.ClientConfig
+}
+
+func (client *SSHClient) Auth(user, password string) {
+	client.Config = &ssh.ClientConfig{
 		User: user,
 		Auth: []ssh.AuthMethod{
 			ssh.Password(password),
@@ -17,59 +23,56 @@ func EstablishSSHSession(host, port, user, password string) (*ssh.Session, error
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         5 * time.Second,
 	}
+}
 
-	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", host, port), config)
+func (client *SSHClient) establishSSHSession() error {
+	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", client.Host, client.Port), client.Config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to dial: %w", err)
+		return fmt.Errorf("failed to dial: %w", err)
 	}
 
 	session, err := conn.NewSession()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create session: %w", err)
+		return fmt.Errorf("failed to create session: %w", err)
 	}
-
-	return session, nil
+	client.Session = session
+	return nil
 }
 
-func ExecuteLSCommand(session *ssh.Session) (string, error) {
+func (client *SSHClient) ExecuteCommand(command string) (string, error) {
 	var b bytes.Buffer
-	session.Stdout = &b
-	if err := session.Run("ls"); err != nil {
+	client.Session.Stdout = &b
+	client.establishSSHSession()
+	defer client.Session.Close()
+	
+	if err := client.Session.Run(command); err != nil {
 		return "", fmt.Errorf("failed to run command: %w", err)
 	}
 	return b.String(), nil
 }
 
-func DownloadImage(session *ssh.Session, url string) error {
-	var b bytes.Buffer
-	session.Stdout = &b
+func (client *SSHClient) ExecuteLSCommand() (string, error) {
+	return client.ExecuteCommand("ls")
+}
+
+func (client *SSHClient) DownloadImage(url string) (string,error) {
 	download := fmt.Sprintf("wget -O /tmp/talos.raw.xz %s", url)
-	if err := session.Run(download); err != nil {
-		return fmt.Errorf("failed to download: %w", err)
-	}
-	fmt.Printf("Downloaded image: %s", b.String())
-	return nil
+	return client.ExecuteCommand(download)
 }
 
-func InstallImage(session *ssh.Session, disk string) error {
-	var b bytes.Buffer
-	session.Stdout = &b
+func (client *SSHClient) InstallImage(disk string) (string,error) {
 	unpack := fmt.Sprintf("zstdcat -dv /tmp/talos.raw.xz >/dev/%s", disk)
-	if err := session.Run(unpack); err != nil {
-		return fmt.Errorf("failed to run unpack image file: %w", err)
-	}
-	fmt.Printf("installed image at disk: %s", b.String())
-	return nil
+	return client.ExecuteCommand(unpack)
 }
 
-func WaitForReboot(sshHost string, sshPort string, sshUser string, sshPassword string) bool {
+func (client *SSHClient) WaitForReboot() bool {
 	maxRetries := 10
 	retryInterval := 10 * time.Second
 
 	for i := 0; i < maxRetries; i++ {
-		fmt.Printf("Attempt %d: Establishing SSH session to %s:%s with user %s\n", i+1, sshHost, sshPort, sshUser)
+		fmt.Printf("Attempt %d: Establishing SSH session to %s:%s\n", i+1, client.Host, client.Port)
 
-		session, err := EstablishSSHSession(sshHost, sshPort, sshUser, sshPassword)
+		err := client.establishSSHSession()
 		if err != nil {
 			fmt.Printf("Error establishing SSH session: %v\n", err)
 			if i < maxRetries-1 {
@@ -79,7 +82,6 @@ func WaitForReboot(sshHost string, sshPort string, sshUser string, sshPassword s
 			}
 			return true
 		}
-		defer session.Close()
 		return false
 	}
 	return true

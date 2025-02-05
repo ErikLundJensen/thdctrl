@@ -68,3 +68,12 @@ Network conclusion of 27/1
 TODO:
 * enable encryption
 * Does Cilium support host network policies? Is unencrypted traffic allowed?
+
+
+IPv6:
+* Single IPv6 stack is not really production ready.
+  See also https://github.com/siderolabs/talos/issues/9372
+
+Talos, vSwitch and private networks
+* We are a little early out with this. See also 
+  https://github.com/siderolabs/talos/issues/7184#issuecomment-2365154649

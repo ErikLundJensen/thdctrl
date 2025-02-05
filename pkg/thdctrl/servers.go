@@ -52,7 +52,7 @@ func ListServers(client robot.Client) ([]Server, error) {
 	return servers, nil
 }
 
-func ResetServer(client robot.Client, serverNumber string, resetMode string) error {
+func RebootServer(client robot.Client, serverNumber string, resetMode string) error {
 	path := fmt.Sprintf("reset/%s", serverNumber)
 
 	data := url.Values{}
@@ -62,6 +62,6 @@ func ResetServer(client robot.Client, serverNumber string, resetMode string) err
 	if err != nil {
 		return err
 	}
-	fmt.Println("Server reset successfully.")
+	fmt.Println("Server reboot successfully initiated")
 	return nil
 }

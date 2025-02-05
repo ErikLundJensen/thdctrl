@@ -56,55 +56,43 @@ func initializeServer(client robot.Client, resetMode *string, enableRescueSystem
     }
 
     if *resetMode != "none" {
-        err = thdctrl.ResetServer(client, serverNumber, *resetMode)
+        err = thdctrl.RebootServer(client, serverNumber, *resetMode)
     }
     if (err != nil || rescue == nil) {
         fmt.Printf("Rescue system state is not available: %v\n", err)
         return
     }
-    sshHost := rescue.Rescue.ServerIP
-    sshPort := "22" // Default SSH port
+    sshClient := &thdctrl.SSHClient {
+        Host: rescue.Rescue.ServerIP,
+        Port: "22",
+    }
     sshUser := "root"
     if rescue.Rescue.Password != "" {
         sshPassword = rescue.Rescue.Password
     }
+    sshClient.Auth(sshUser, sshPassword)
 
-    thdctrl.WaitForReboot(sshHost, sshPort, sshUser, sshPassword)
-	fmt.Printf("Server ready\n")
-
-    // TODO: use wrapper for SSH session
-	session, err := thdctrl.EstablishSSHSession(sshHost, sshPort, sshUser, sshPassword)
-	if err != nil {
-		fmt.Printf("Error establishing SSH session: %v\n", err)
-		return
-	}
+    sshClient.WaitForReboot()
+	fmt.Printf("Server rebooted with Talos\n")
 
     // Don't use image hcloud-amd64 target Hetzner Cloud, use Talos 'metal' image instead
     version := "v1.9.2"
     imageUrl := fmt.Sprintf("https://github.com/siderolabs/talos/releases/download/%s/metal-amd64.raw.zst", version)
-    err = thdctrl.DownloadImage(session, imageUrl)
+    output, err := sshClient.DownloadImage(imageUrl)
 	if err != nil {
-		fmt.Printf("Failed to download image: %v\n", err)
+		fmt.Printf("Failed to download image: %v, output %s\n", err, output)
 		return
 	}
-    session.Close()
 
-    session, err = thdctrl.EstablishSSHSession(sshHost, sshPort, sshUser, sshPassword)
+    output, err = sshClient.InstallImage(*disk)
 	if err != nil {
-		fmt.Printf("Error establishing SSH session: %v\n", err)
-		return
-	}
-    defer session.Close()
-
-    err = thdctrl.InstallImage(session, *disk)
-	if err != nil {
-		fmt.Printf("Failed to install image: %v\n", err)
+		fmt.Printf("Failed to install image: %v output %s\n", err, output)
 		return
 	}
 
     // TODO: second reboot should not be dependen upon reset mode.
     if *resetMode != "none" {
-        thdctrl.ResetServer(client, serverNumber, *resetMode)
+        thdctrl.RebootServer(client, serverNumber, *resetMode)
     }
 
     // Wait for Talos API to become available
