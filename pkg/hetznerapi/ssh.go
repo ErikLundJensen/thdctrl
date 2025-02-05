@@ -1,4 +1,4 @@
-package thdctrl
+package hetznerapi
 
 import (
 	"bytes"
@@ -41,6 +41,9 @@ func (client *SSHClient) establishSSHSession() error {
 
 func (client *SSHClient) ExecuteCommand(command string) (string, error) {
 	var b bytes.Buffer
+	if client.Session == nil {
+		return "", fmt.Errorf("session is not established")
+	}
 	client.Session.Stdout = &b
 	client.establishSSHSession()
 	defer client.Session.Close()

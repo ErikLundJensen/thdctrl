@@ -1,4 +1,4 @@
-package thdctrl
+package hetznerapi
 
 import (
 	"encoding/json"
@@ -52,11 +52,11 @@ func ListServers(client robot.Client) ([]Server, error) {
 	return servers, nil
 }
 
-func RebootServer(client robot.Client, serverNumber string, resetMode string) error {
-	path := fmt.Sprintf("reset/%s", serverNumber)
+func RebootServer(client robot.Client, serverNumber int) error {
+	path := fmt.Sprintf("reset/%d", serverNumber)
 
 	data := url.Values{}
-	data.Set("type", resetMode)
+	data.Set("type", "hw")
 
 	_, err := client.Post(path, data)
 	if err != nil {

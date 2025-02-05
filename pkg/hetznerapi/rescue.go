@@ -1,4 +1,4 @@
-package thdctrl
+package hetznerapi
 
 import (
 	"encoding/json"
@@ -22,8 +22,8 @@ type Rescue struct {
 	Rescue RescueDetails `json:"rescue"`
 }
 
-func GetRescueSystemDetails(client robot.Client, serverNumber string) (*Rescue, error) {
-	path := fmt.Sprintf("boot/%s/rescue", serverNumber)
+func GetRescueSystemDetails(client robot.Client, serverNumber int) (*Rescue, error) {
+	path := fmt.Sprintf("boot/%d/rescue", serverNumber)
 
 	body, err := client.Get(path)
 	if err != nil {
@@ -38,8 +38,8 @@ func GetRescueSystemDetails(client robot.Client, serverNumber string) (*Rescue, 
 	return &rescue, nil
 }
 
-func EnableRescueSystem(client robot.Client, serverNumber string) (*Rescue, error) {
-	path := fmt.Sprintf("boot/%s/rescue", serverNumber)
+func EnableRescueSystem(client robot.Client, serverNumber int) (*Rescue, error) {
+	path := fmt.Sprintf("boot/%d/rescue", serverNumber)
 
 	data := url.Values{}
 	data.Set("os", "linux")

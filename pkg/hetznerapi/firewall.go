@@ -1,4 +1,4 @@
-package thdctrl
+package hetznerapi
 
 import (
 	"encoding/json"
@@ -38,8 +38,8 @@ type FirewallTemplate struct {
 	Rules                    []FirewallRule `json:"rules"`
 }
 
-func GetFirewallRules(client robot.Client, serverID string) (*FirewallSet, error) {
-	path := fmt.Sprintf("firewall/%s", serverID)
+func GetFirewallRules(client robot.Client, serverNumber int) (*FirewallSet, error) {
+	path := fmt.Sprintf("firewall/%d", serverNumber)
 	body, err := client.Get(path)
 	if err != nil {
 		return nil, err
@@ -69,8 +69,8 @@ func GetFirewallTemplates(client robot.Client) ([]FirewallTemplate, error) {
 	return templates, nil
 }
 
-func CreateFirewallRule(client robot.Client, serverID string, cfg FirewallSet) error {
-	path := fmt.Sprintf("firewall/%s", serverID)
+func CreateFirewallRule(client robot.Client, serverNumber int, cfg FirewallSet) error {
+	path := fmt.Sprintf("firewall/%d", serverNumber)
 
 	data := url.Values{}
 	data.Set("status", cfg.Status)
