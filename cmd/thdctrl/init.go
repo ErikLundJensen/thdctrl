@@ -9,12 +9,16 @@ import (
 	"github.com/eriklundjensen/thdctrl/pkg/hetznerapi"
 )
 
-var initCmdFlags struct {
+type cmdFlags struct {
 		skipReboot bool
 		enableRescueSystem bool
 		disk string
 		serverNumber int
+		version string
+		image string
 }
+
+var initCmdFlags cmdFlags
 
 var initCmd = &cobra.Command{
 	Use:   "init <serverNumber>",
@@ -26,18 +30,20 @@ var initCmd = &cobra.Command{
 				fmt.Printf("Error parsing server number: %v\n", err)
 				return
 			}
-			initializeServer(RobotClient, initCmdFlags.skipReboot, initCmdFlags.enableRescueSystem, initCmdFlags.disk, serverNumber)
+			initializeServer(RobotClient, serverNumber, initCmdFlags)
 	},
 }
 
 func init() {
-		initCmd.Flags().BoolVarP(&initCmdFlags.skipReboot, "skipReboot", "n", false ,"Skip reboot of server after enabling rescue system")
-		initCmd.Flags().BoolVarP(&initCmdFlags.enableRescueSystem, "enable-rescue-system", "r", false, "enableRescueSystem: entering rescue system even if rescue system already enabled. This will generate a new password")
-		initCmd.Flags().StringVarP(&initCmdFlags.disk, "disk", "d", "nvme0n1", "Disk to use for installation of image")
+		initCmd.Flags().BoolVarP(&initCmdFlags.skipReboot, "skipReboot", "n", false ,"skip reboot of server after enabling rescue system.")
+		initCmd.Flags().BoolVarP(&initCmdFlags.enableRescueSystem, "enable-rescue-system", "r", false, "entering rescue system even if rescue system already enabled. This will generate a new password.")
+		initCmd.Flags().StringVarP(&initCmdFlags.disk, "disk", "d", "nvme0n1", "disk to use for installation of image.")
+		initCmd.Flags().StringVarP(&initCmdFlags.version, "version", "v", "1.9.2", "Talos version.")
+		initCmd.Flags().StringVarP(&initCmdFlags.image, "image", "i", "", "Talos image URL. Don't use hcloud-amd64 image target Hetzner Cloud, use Talos 'metal' image instead.")
 		addCommand(initCmd)
 }
 
-func initializeServer(client robot.Client, skipReboot bool, enableRescueSystem bool, disk string, serverNumber int) {
+func initializeServer(client robot.Client, serverNumber int, f cmdFlags ) {
 	sshPassword := os.Getenv("HETZNER_SSH_PASSWORD") // Set your Hetzner password in environment variable
 
 	rescue, err := hetznerapi.GetRescueSystemDetails(client, serverNumber)
@@ -46,7 +52,7 @@ func initializeServer(client robot.Client, skipReboot bool, enableRescueSystem b
 			return
 	}
 
-	if (!rescue.Rescue.Active || enableRescueSystem) {
+	if (!rescue.Rescue.Active || f.enableRescueSystem) {
 			rescue, err = hetznerapi.EnableRescueSystem(client, serverNumber)
 			if err != nil {
 					fmt.Printf("Error enabling rescue system: %v\n", err)
@@ -54,7 +60,7 @@ func initializeServer(client robot.Client, skipReboot bool, enableRescueSystem b
 			}
 	}
 
-	if !skipReboot  {
+	if !f.skipReboot  {
 			err = hetznerapi.RebootServer(client, serverNumber)
 	}
 	if (err != nil || rescue == nil) {
@@ -74,16 +80,25 @@ func initializeServer(client robot.Client, skipReboot bool, enableRescueSystem b
 	sshClient.WaitForReboot()
 	fmt.Printf("Server rebooted with Talos\n")
 
-	// Don't use image hcloud-amd64 target Hetzner Cloud, use Talos 'metal' image instead
 	version := "v1.9.2"
+	if f.version != "" {
+		if f.image != "" {
+			fmt.Println("Warning: Both version and image flags are set. Using image flag.")
+		}
+		version = f.version
+	}
 	imageUrl := fmt.Sprintf("https://github.com/siderolabs/talos/releases/download/%s/metal-amd64.raw.zst", version)
+	if f.image != "" {
+		imageUrl = f.image
+	}
+
 	output, err := sshClient.DownloadImage(imageUrl)
 	if err != nil {
 		fmt.Printf("Failed to download image: %v, output %s\n", err, output)
 		return
 	}
 
-	output, err = sshClient.InstallImage(disk)
+	output, err = sshClient.InstallImage(f.disk)
 	if err != nil {
 		fmt.Printf("Failed to install image: %v output %s\n", err, output)
 		return
@@ -92,7 +107,7 @@ func initializeServer(client robot.Client, skipReboot bool, enableRescueSystem b
 	hetznerapi.RebootServer(client, serverNumber)
 
 	// Wait for Talos API to become available
-	// Apply Talos configuration
+	// Apply Talos configuration & bootstrap
 	// Apply Cilium
 	// Reboot node
 }
