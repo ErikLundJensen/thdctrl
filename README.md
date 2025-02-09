@@ -1,36 +1,101 @@
 # Talos Hetzner Dedicated Control CLI - thdctrl
 
+## Overview
 
-Initialise Hetzner servers by using their serverNumber
+`thdctrl` is a command-line tool to manage Hetzner dedicated servers with Talos. It provides various commands to initialize, configure, and manage your servers.
 
+## Installation
 
+To build and install `thdctrl`, use the provided Dockerfile:
+
+```sh
+docker build -t thdctrl .
+docker run --rm -v $(pwd):/root thdctrl
+```
+
+## Usage
+
+Use `thdctrl --help` to get a list of available commands and arguments.
+
+### Commands
+
+#### `init`
+
+Initialize Hetzner servers by using their server number.
+
+```sh
+thdctrl init <serverNumber>
+```
+
+Example:
+
+```sh
 thdctrl init 123456
-
-talosctl bootstrap
-
-talosctl apply
-
-talosctl dashboard
-
-. ./init-env-sh
-./gen-cilium.sh
-
-kubectl apply -f gen/cilium.yaml
-
-# Reboot servers after applying Cilium configuration
-talosctl reboot
-
-# Watch pods get healthy
-kubectl get pods -A
+```
 
 
+### Flags
 
-## thdctrl
+- `--help`: Show help information for `thdctrl` commands.
+- `--version`: Show the version of `thdctrl`.
 
-Use `thdctrl --help` to get commands and arguments
+## Example Workflow
 
+1. Initialize the server:
 
-## New features
-Get disk name during SSH sessions (e.g. if disk is not specified in the command line).
-Or add command to list disks and sizes.
+    ```sh
+    thdctrl init 123456
+    ```
 
+2. Wait for "waiting for bootstrap" and then bootstrap Talos:
+
+    ```sh
+    talosctl bootstrap
+    ```
+
+3. Wait for the API server to be ready, then apply the configuration:
+
+    ```sh
+    . ./init-env-sh
+    . ./generate-config.sh
+    talosctl apply
+    ```
+
+4. Apply the Cilium configuration:
+
+    ```sh
+    ./gen-cilium.sh
+    kubectl apply -f gen/cilium.yaml
+    ```
+
+5. Reboot the servers:
+
+    ```sh
+    talosctl reboot
+    ```
+
+6. Wait for the nodes to be ready and open the Talos dashboard:
+
+    ```sh
+    talosctl dashboard
+    ```
+
+7. Watch the pods get healthy:
+
+    ```sh
+    kubectl get pods -A
+    ```
+
+## New Features
+
+- Get disk name during SSH sessions (e.g., if the disk is not specified in the command line).
+- Add a command to list disks and sizes.
+
+## TODO
+
+- Add shutdown command.
+- Change node-2 to a worker node.
+- Re-initialize nodes.
+- Add VIP address (in case of more control plane nodes).
+- Install Hetzner Load Balancer operator.
+- Test load balancer.

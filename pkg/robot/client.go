@@ -10,6 +10,12 @@ import (
 
 var HETZNER_SERVER_URL = "https://robot-ws.your-server.de"
 
+// ClientInterface defines the methods that a client must implement
+type ClientInterface interface {
+	Get(path string) ([]byte, error)
+	Post(path string, values url.Values) ([]byte, error)
+}
+
 type Client struct {
 	Username string
 	Password string
@@ -20,7 +26,7 @@ func (c Client) Get(path string) ([]byte, error) {
 	return c.MakeRequest("GET", path, nil)
 }
 
-// Invoke GET HTTP request using Hetzner API. Path is added to the base URL.
+// Invoke POST HTTP request using Hetzner API. Path is added to the base URL.
 func (c Client) Post(path string, values url.Values) ([]byte, error) {
 	return c.MakeRequest("POST", path, values)
 }
@@ -28,7 +34,7 @@ func (c Client) Post(path string, values url.Values) ([]byte, error) {
 // Invoke Hetzner API. Path is added to the base URL.
 func (c Client) MakeRequest(action, path string, values url.Values) ([]byte, error) {
 	url := fmt.Sprintf("%s/%s", HETZNER_SERVER_URL, path)
-	
+
 	var parameters io.Reader
 	if values != nil {
 		parameters = strings.NewReader(values.Encode())

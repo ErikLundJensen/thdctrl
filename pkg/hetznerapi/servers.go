@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+
 	"github.com/eriklundjensen/thdctrl/pkg/robot"
 )
 
@@ -36,9 +37,9 @@ type Servers struct {
 	Servers Server `json:"server"`
 }
 
-func ListServers(client robot.Client) ([]Server, error) {
+func ListServers(client robot.ClientInterface) ([]Server, error) {
 	path := "server"
-	
+
 	body, err := client.Get(path)
 	if err != nil {
 		return nil, err
@@ -52,7 +53,7 @@ func ListServers(client robot.Client) ([]Server, error) {
 	return servers, nil
 }
 
-func RebootServer(client robot.Client, serverNumber int) error {
+func RebootServer(client robot.ClientInterface, serverNumber int) error {
 	path := fmt.Sprintf("reset/%d", serverNumber)
 
 	data := url.Values{}
