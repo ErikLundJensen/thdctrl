@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+
 	"github.com/eriklundjensen/thdctrl/pkg/robot"
 )
 
@@ -22,7 +23,7 @@ type Rescue struct {
 	Rescue RescueDetails `json:"rescue"`
 }
 
-func GetRescueSystemDetails(client robot.Client, serverNumber int) (*Rescue, error) {
+func GetRescueSystemDetails(client robot.ClientInterface, serverNumber int) (*Rescue, error) {
 	path := fmt.Sprintf("boot/%d/rescue", serverNumber)
 
 	body, err := client.Get(path)
@@ -38,7 +39,7 @@ func GetRescueSystemDetails(client robot.Client, serverNumber int) (*Rescue, err
 	return &rescue, nil
 }
 
-func EnableRescueSystem(client robot.Client, serverNumber int) (*Rescue, error) {
+func EnableRescueSystem(client robot.ClientInterface, serverNumber int) (*Rescue, error) {
 	path := fmt.Sprintf("boot/%d/rescue", serverNumber)
 
 	data := url.Values{}

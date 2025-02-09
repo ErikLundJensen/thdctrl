@@ -10,13 +10,13 @@ import (
 
 type FirewallRule struct {
 	Direction string `json:"direction"`
-	SrcIP    string `json:"src_ip"`
-	DstIP    string `json:"dst_ip"`
-	Protocol string `json:"protocol"`
-	SrcPort  string `json:"src_port"`
-	DstPort  string `json:"dst_port"`
-	Action   string `json:"action"`
-	TCPFlags string `json:"tcp_flags"`
+	SrcIP     string `json:"src_ip"`
+	DstIP     string `json:"dst_ip"`
+	Protocol  string `json:"protocol"`
+	SrcPort   string `json:"src_port"`
+	DstPort   string `json:"dst_port"`
+	Action    string `json:"action"`
+	TCPFlags  string `json:"tcp_flags"`
 }
 
 type FirewallSet struct {
@@ -38,7 +38,7 @@ type FirewallTemplate struct {
 	Rules                    []FirewallRule `json:"rules"`
 }
 
-func GetFirewallRules(client robot.Client, serverNumber int) (*FirewallSet, error) {
+func GetFirewallRules(client robot.ClientInterface, serverNumber int) (*FirewallSet, error) {
 	path := fmt.Sprintf("firewall/%d", serverNumber)
 	body, err := client.Get(path)
 	if err != nil {
@@ -53,7 +53,7 @@ func GetFirewallRules(client robot.Client, serverNumber int) (*FirewallSet, erro
 	return &firewall, nil
 }
 
-func GetFirewallTemplates(client robot.Client) ([]FirewallTemplate, error) {
+func GetFirewallTemplates(client robot.ClientInterface) ([]FirewallTemplate, error) {
 	path := "firewall/template"
 
 	body, err := client.Get(path)
@@ -69,7 +69,7 @@ func GetFirewallTemplates(client robot.Client) ([]FirewallTemplate, error) {
 	return templates, nil
 }
 
-func CreateFirewallRule(client robot.Client, serverNumber int, cfg FirewallSet) error {
+func CreateFirewallRule(client robot.ClientInterface, serverNumber int, cfg FirewallSet) error {
 	path := fmt.Sprintf("firewall/%d", serverNumber)
 
 	data := url.Values{}
@@ -78,7 +78,7 @@ func CreateFirewallRule(client robot.Client, serverNumber int, cfg FirewallSet) 
 	//data.Set("filter_ipv6", cfg.FilterIPv6)
 	//data.Set("whitelist_hos", cfg.WhitelistHetznerServices)
 	//data.Set("rules", rules)
-	
+
 	_, err := client.Post(path, data)
 	if err != nil {
 		return err
