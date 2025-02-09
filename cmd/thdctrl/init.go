@@ -104,9 +104,4 @@ func initializeServer(client robot.Client, serverNumber int, f cmdFlags ) {
 	}
 
 	hetznerapi.RebootServer(client, serverNumber)
-
-	// Wait for Talos API to become available
-	// Apply Talos configuration & bootstrap
-	// Apply Cilium
-	// Reboot node
 }

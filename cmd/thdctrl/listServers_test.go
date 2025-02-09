@@ -1,6 +1,7 @@
 package thdctrl
 
 import (
+	"errors"
 	"net/url"
 	"testing"
 
@@ -9,7 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockRobotClient struct{}
+type mockRobotClient struct {
+	shouldFail bool
+}
 
 func (m *mockRobotClient) Get(path string) ([]byte, error) {
 	response := `[
@@ -28,6 +31,9 @@ func (m *mockRobotClient) Get(path string) ([]byte, error) {
 }
 
 func (m *mockRobotClient) Post(path string, values url.Values) ([]byte, error) {
+	if m.shouldFail {
+		return nil, errors.New("failed to reboot server")
+	}
 	response := `{"status": "success"}`
 	return []byte(response), nil
 }
@@ -43,4 +49,17 @@ func TestListServers(t *testing.T) {
 	assert.Equal(t, "FSN1-DC8", servers[0].Server.Datacenter)
 	assert.Equal(t, "192.168.1.1", servers[0].Server.ServerIP)
 	assert.Equal(t, "2001:db8::/32", servers[0].Server.ServerIPv6Net)
+}
+
+func TestRebootServer(t *testing.T) {
+	var client robot.ClientInterface = &mockRobotClient{}
+	err := hetznerapi.RebootServer(client, 123456)
+	assert.NoError(t, err)
+}
+
+func TestRebootServerError(t *testing.T) {
+	client := &mockRobotClient{shouldFail: true}
+	err := hetznerapi.RebootServer(client, 123456)
+	assert.Error(t, err)
+	assert.Equal(t, "failed to reboot server", err.Error())
 }
