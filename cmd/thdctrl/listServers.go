@@ -28,9 +28,9 @@ func listServers(client robot.Client) error {
 	}
 	fmt.Println("List of servers:")
 	for _, server := range servers {
-		serverDetail := server.Server
+		serverDetails := server.Server
 		fmt.Printf("ID: %d, Name: %s, Product: %s, Datacenter: %s, IPv4: %s, IPv6: %s\n",
-			serverDetail.ServerNumber, serverDetail.ServerName, serverDetail.Product, serverDetail.Datacenter, serverDetail.ServerIP, serverDetail.ServerIPv6Net)
+			serverDetails.ServerNumber, serverDetails.ServerName, serverDetails.Product, serverDetails.Datacenter, serverDetails.ServerIP, serverDetails.ServerIPv6Net)
 	}
 	return nil
 }

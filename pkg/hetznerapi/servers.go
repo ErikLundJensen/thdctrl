@@ -37,6 +37,23 @@ type Servers struct {
 	Servers Server `json:"server"`
 }
 
+func GetServerDetails(client robot.ClientInterface, serverNumber int) (*ServerDetails, error) {
+	path := fmt.Sprintf("server/%d", serverNumber)
+
+	body, err := client.Get(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var serverDetails ServerDetails
+	if err := json.Unmarshal(body, &serverDetails); err != nil {
+		return nil, fmt.Errorf("failed to decode response body: %w", err)
+	}
+
+	return &serverDetails, nil
+}
+
+
 func ListServers(client robot.ClientInterface) ([]Server, error) {
 	path := "server"
 
