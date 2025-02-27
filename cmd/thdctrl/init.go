@@ -77,7 +77,7 @@ func initializeServer(client robot.ClientInterface, sshClient hetznerapi.SSHClie
 	sshClient.Auth(sshUser, sshPassword)
 
 	sshClient.WaitForReboot()
-	fmt.Printf("Server rebooted with Talos\n")
+	fmt.Printf("Server rebooted in rescue system mode\n")
 
 	version := "v1.9.2"
 	if f.version != "" {
