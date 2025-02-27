@@ -28,10 +28,11 @@ func init() {
 }
 
 
-func listFirewallRules(client robot.Client, serverNumber int) {
+func listFirewallRules(client robot.Client, serverNumber int) error {
     firewallRes, err := hetznerapi.GetFirewallRules(client, serverNumber) 
     if err != nil {
         fmt.Printf("Error getting firewall rules: %v\n", err)
+        return err
     }
     fmt.Println("Firewall status:")
     fmt.Printf("Server: %d, Status:%s\n", firewallRes.ServerNumber, firewallRes.Status)
@@ -41,4 +42,5 @@ func listFirewallRules(client robot.Client, serverNumber int) {
         fmt.Printf("SrcIP: %s, DstIP: %s, Protocol: %s, SrcPort: %s, DstPort: %s, Action: %s, TCPFlags: %s\n",
             rule.SrcIP, rule.DstIP, rule.Protocol, rule.SrcPort, rule.DstPort, rule.Action, rule.TCPFlags)
     }
+    return nil
 }

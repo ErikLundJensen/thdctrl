@@ -47,6 +47,11 @@ func (m *MockSSHClient) InstallImage(disk string) (string, error) {
 	return args.String(0), args.Error(1)
 }
 
+func (m *MockSSHClient) ListDisks() (string, error) {
+	args := m.Called()
+	return args.String(0), args.Error(1)
+}
+
 func (m *MockSSHClient) EstablishSSHSession() error {
 	args := m.Called()
 	return args.Error(0)
@@ -92,6 +97,7 @@ func TestInitializeServer(t *testing.T) {
 	mockSSHClient.On("WaitForReboot").Return(true)
 	mockSSHClient.On("DownloadImage", mock.Anything).Return("Downloaded", nil)
 	mockSSHClient.On("InstallImage", mock.Anything).Return("Installed", nil)
+	mockSSHClient.On("ListDisks", mock.Anything).Return("Disks", nil)
 	mockSSHClient.On("SetTargetHost", mock.Anything, mock.Anything).Return(nil)
 	
 	// Call the function

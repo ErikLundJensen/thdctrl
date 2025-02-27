@@ -15,8 +15,9 @@ type SSHClientInterface interface {
 	ExecuteLSCommand() (string, error)
 	DownloadImage(url string) (string, error)
 	InstallImage(disk string) (string, error)
+	ListDisks() (string, error)
 	WaitForReboot() bool
-	SetTargetHost(host, port string) 
+	SetTargetHost(host, port string)	
 }
 
 type SSHClient struct {
@@ -73,6 +74,10 @@ func (client *SSHClient) ExecuteLSCommand() (string, error) {
 func (client *SSHClient) DownloadImage(url string) (string, error) {
 	download := fmt.Sprintf("wget -O /tmp/talos.raw.xz %s", url)
 	return client.ExecuteCommand(download)
+}
+
+func (client *SSHClient) ListDisks() (string, error) {
+	return client.ExecuteCommand("lsblk")
 }
 
 func (client *SSHClient) InstallImage(disk string) (string, error) {

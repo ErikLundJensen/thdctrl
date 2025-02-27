@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const defaultTalosVersion = "v1.9.2"
+
 type cmdFlags struct {
 	skipReboot         bool
 	enableRescueSystem bool
@@ -24,14 +26,15 @@ var initCmd = &cobra.Command{
 	Use:   "init <serverNumber>",
 	Short: "Initialize the application",
 	Args:  cobra.RangeArgs(1, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		serverNumber, err := strconv.Atoi(args[0])
 		if err != nil {
 			fmt.Printf("Error parsing server number: %v\n", err)
-			return
+			return err
 		}
 		sshClient := &hetznerapi.SSHClient{}
-		initializeServer(RobotClient, sshClient, serverNumber, initCmdFlags)
+		err = initializeServer(RobotClient, sshClient, serverNumber, initCmdFlags)
+		return err
 	},
 }
 
@@ -39,25 +42,25 @@ func init() {
 	initCmd.Flags().BoolVarP(&initCmdFlags.skipReboot, "skipReboot", "n", false, "skip reboot of server after enabling rescue system.")
 	initCmd.Flags().BoolVarP(&initCmdFlags.enableRescueSystem, "enable-rescue-system", "r", false, "entering rescue system even if rescue system already enabled. This will generate a new password.")
 	initCmd.Flags().StringVarP(&initCmdFlags.disk, "disk", "d", "nvme0n1", "disk to use for installation of image.")
-	initCmd.Flags().StringVarP(&initCmdFlags.version, "version", "v", "1.9.2", "Talos version.")
+	initCmd.Flags().StringVarP(&initCmdFlags.version, "version", "v", defaultTalosVersion, "Talos version.")
 	initCmd.Flags().StringVarP(&initCmdFlags.image, "image", "i", "", "Talos image URL. Don't use hcloud-amd64 image target Hetzner Cloud, use Talos 'metal' image instead.")
 	addCommand(initCmd)
 }
 
-func initializeServer(client robot.ClientInterface, sshClient hetznerapi.SSHClientInterface, serverNumber int, f cmdFlags) {
+func initializeServer(client robot.ClientInterface, sshClient hetznerapi.SSHClientInterface, serverNumber int, f cmdFlags) error {
 	sshPassword := os.Getenv("HETZNER_SSH_PASSWORD") // Set your Hetzner password in environment variable
 
 	rescue, err := hetznerapi.GetRescueSystemDetails(client, serverNumber)
 	if err != nil {
 		fmt.Printf("Error getting rescue system status: %v\n", err)
-		return
+		return err
 	}
 
 	if !rescue.Rescue.Active || f.enableRescueSystem {
 		rescue, err = hetznerapi.EnableRescueSystem(client, serverNumber)
 		if err != nil {
 			fmt.Printf("Error enabling rescue system: %v\n", err)
-			return
+			return err
 		}
 	}
 
@@ -66,7 +69,7 @@ func initializeServer(client robot.ClientInterface, sshClient hetznerapi.SSHClie
 	}
 	if err != nil || rescue == nil {
 		fmt.Printf("Rescue system state is not available: %v\n", err)
-		return
+		return err
 	}
 	sshClient.SetTargetHost(rescue.Rescue.ServerIP, "22")
 	
@@ -79,7 +82,7 @@ func initializeServer(client robot.ClientInterface, sshClient hetznerapi.SSHClie
 	sshClient.WaitForReboot()
 	fmt.Printf("Server rebooted in rescue system mode\n")
 
-	version := "v1.9.2"
+	version := defaultTalosVersion
 	if f.version != "" {
 		if f.image != "" {
 			fmt.Println("Warning: Both version and image flags are set. Using image flag.")
@@ -94,14 +97,16 @@ func initializeServer(client robot.ClientInterface, sshClient hetznerapi.SSHClie
 	output, err := sshClient.DownloadImage(imageUrl)
 	if err != nil {
 		fmt.Printf("Failed to download image: %v, output %s\n", err, output)
-		return
+		return err
 	}
 
 	output, err = sshClient.InstallImage(f.disk)
 	if err != nil {
 		fmt.Printf("Failed to install image: %v output %s\n", err, output)
-		return
+		output, err = sshClient.ListDisks()
+		return err
 	}
 
 	hetznerapi.RebootServer(client, serverNumber)
+	return nil
 }
