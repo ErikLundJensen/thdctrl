@@ -38,7 +38,7 @@ type FirewallTemplate struct {
 	Rules                    []FirewallRule `json:"rules"`
 }
 
-func GetFirewallRules(client robot.ClientInterface, serverNumber int) (*FirewallSet, error) {
+func GetFirewallRules(client robot.ClientInterface, serverNumber int) (*FirewallSet, *robot.HTTPError) {
 	path := fmt.Sprintf("firewall/%d", serverNumber)
 	body, err := client.Get(path)
 	if err != nil {
@@ -47,13 +47,13 @@ func GetFirewallRules(client robot.ClientInterface, serverNumber int) (*Firewall
 
 	var firewall FirewallSet
 	if err := json.Unmarshal(body, &firewall); err != nil {
-		return nil, fmt.Errorf("failed to decode response body: %w", err)
+		return nil, &robot.HTTPError{ StatusCode: 0, Message: "failed to unmarshal response", Err: err }
 	}
 
 	return &firewall, nil
 }
 
-func GetFirewallTemplates(client robot.ClientInterface) ([]FirewallTemplate, error) {
+func GetFirewallTemplates(client robot.ClientInterface) ([]FirewallTemplate, *robot.HTTPError) {
 	path := "firewall/template"
 
 	body, err := client.Get(path)
@@ -63,13 +63,13 @@ func GetFirewallTemplates(client robot.ClientInterface) ([]FirewallTemplate, err
 
 	var templates []FirewallTemplate
 	if err := json.Unmarshal(body, &templates); err != nil {
-		return nil, fmt.Errorf("failed to decode response body: %w", err)
+		return nil, &robot.HTTPError{ StatusCode: 0, Message: "failed to unmarshal response", Err: err }
 	}
 
 	return templates, nil
 }
 
-func CreateFirewallRule(client robot.ClientInterface, serverNumber int, cfg FirewallSet) error {
+func CreateFirewallRule(client robot.ClientInterface, serverNumber int, cfg FirewallSet) *robot.HTTPError {
 	path := fmt.Sprintf("firewall/%d", serverNumber)
 
 	data := url.Values{}

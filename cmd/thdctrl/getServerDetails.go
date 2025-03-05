@@ -2,6 +2,7 @@ package thdctrl
 
 import (
 	"fmt"
+	"errors"
 	"strconv"
 	"github.com/spf13/cobra"
 	"github.com/eriklundjensen/thdctrl/pkg/robot"
@@ -9,7 +10,7 @@ import (
 )
 
 var getServerCmd = &cobra.Command{
-	Use:   "GetServer",
+	Use:   "getServer",
 	Short: "Get server details",
 	Args:  cobra.RangeArgs(1, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -31,8 +32,7 @@ func init() {
 func getServerDetails(client robot.Client, serverNumber int) error {
 	serverDetails, err := hetznerapi.GetServerDetails(client, serverNumber)
 	if err != nil {
-		fmt.Printf("Error getting server details: %v\n", err)
-		return err
+		return errors.New( fmt.Sprintf("Error getting server details: %v\n", err) )
 	}
 
 	fmt.Printf("ID: %d, Name: %s, Product: %s, Datacenter: %s, IPv4: %s, IPv6: %s\n",

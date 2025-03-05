@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/eriklundjensen/thdctrl/pkg/robot"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -12,14 +13,20 @@ type MockClient struct {
 	mock.Mock
 }
 
-func (m *MockClient) Get(path string) ([]byte, error) {
+func (m *MockClient) Get(path string) ([]byte, *robot.HTTPError) {
 	args := m.Called(path)
-	return args.Get(0).([]byte), args.Error(1)
+	if args.Get(1) == nil {
+		return args.Get(0).([]byte), nil
+	}
+	return args.Get(0).([]byte), &robot.HTTPError{ StatusCode: 0, Message: "", Err: args.Get(1).(error)}
 }
 
-func (m *MockClient) Post(path string, data url.Values) ([]byte, error) {
+func (m *MockClient) Post(path string, data url.Values) ([]byte, *robot.HTTPError) {
 	args := m.Called(path, data)
-	return args.Get(0).([]byte), args.Error(1)
+	if args.Get(1) == nil {
+		return args.Get(0).([]byte), nil
+	}
+	return args.Get(0).([]byte), &robot.HTTPError{ StatusCode: 0, Message: "", Err: args.Get(1).(error)}
 }
 
 // Mocking the SSHClientInterface
@@ -99,7 +106,7 @@ func TestInitializeServer(t *testing.T) {
 	mockSSHClient.On("InstallImage", mock.Anything).Return("Installed", nil)
 	mockSSHClient.On("ListDisks", mock.Anything).Return("Disks", nil)
 	mockSSHClient.On("SetTargetHost", mock.Anything, mock.Anything).Return(nil)
-	
+
 	// Call the function
 	initializeServer(mockClient, mockSSHClient, serverNumber, flags)
 
