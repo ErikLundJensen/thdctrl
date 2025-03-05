@@ -1,8 +1,7 @@
 package thdctrl
 
 import (
-	"fmt"
-	"errors"
+  "fmt"
 	"strconv"
 	"github.com/spf13/cobra"
 	"github.com/eriklundjensen/thdctrl/pkg/robot"
@@ -32,7 +31,8 @@ func init() {
 func getServerDetails(client robot.Client, serverNumber int) error {
 	serverDetails, err := hetznerapi.GetServerDetails(client, serverNumber)
 	if err != nil {
-		return errors.New( fmt.Sprintf("Error getting server details: %v\n", err) )
+		fmt.Printf("Error getting server details: %v\n", err.Message)
+		return err.Err
 	}
 
 	fmt.Printf("ID: %d, Name: %s, Product: %s, Datacenter: %s, IPv4: %s, IPv6: %s\n",

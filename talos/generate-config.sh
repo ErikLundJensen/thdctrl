@@ -1,13 +1,17 @@
+#!/bin/bash
+
+set -e
+
 # TODO: change node name and output file name
 # TODO: error handling...
 
 # TODO: Only during bootstrapping of cluster:
-#talosctl gen secrets --output gen/secrets.yaml
-#talosctl gen config --with-secrets gen/secrets.yaml --output-types talosconfig -o gen/talosconfig demo-1 https://138.201.200.236:6443
+talosctl gen secrets --output-file gen/secrets.yaml
+talosctl gen config --with-secrets gen/secrets.yaml --output-types talosconfig -o gen/talosconfig ${CLUSTER_NAME} https://${KUBERNETES_API_SERVER_ADDRESS}:${KUBERNETES_API_SERVER_PORT}
 
 cp all-nodes.yaml gen/all-nodes.yaml
 
-yq -i '.machine.install.disk = "/dev/nvme0n1" | .machine.network.hostname = "node1"' gen/all-nodes.yaml
+yq -i '.machine.install.disk = "/dev/sda" | .machine.network.hostname = "node1"' gen/all-nodes.yaml
 
 talosctl gen config \
         --output gen/c1.yaml                                      \
@@ -18,7 +22,7 @@ talosctl gen config \
         --config-patch @gen/all-nodes.yaml                        \
         --kubernetes-version $KUBERNETES_VERSION                  \
         $CLUSTER_NAME                                             \
-        $API_ENDPOINT
+        https://${KUBERNETES_API_SERVER_ADDRESS}:${KUBERNETES_API_SERVER_PORT}
 
 # TODO: loop through all nodes
 yq -i '.machine.install.disk = "/dev/sda" | .machine.network.hostname = "node2"' gen/all-nodes.yaml
@@ -32,10 +36,10 @@ talosctl gen config \
         --config-patch @gen/all-nodes.yaml                        \
         --kubernetes-version $KUBERNETES_VERSION                  \
         $CLUSTER_NAME                                             \
-        $API_ENDPOINT
+        https://${KUBERNETES_API_SERVER_ADDRESS}:${KUBERNETES_API_SERVER_PORT}
 
-#talosctl -n  138.201.200.236 -e 138.201.200.236 apply-config -f gen/c1.yaml --insecure
-#talosctl -n  136.243.103.75 -e 136.243.103.75 apply-config -f gen/c2.yaml --insecure
+talosctl -n ${NODE_01_IP} -e ${NODE_01_IP}  apply-config -f gen/c1.yaml --insecure
+#talosctl -n  ${NODE_02_IP} -e ${NODE_02_IP} apply-config -f gen/c2.yaml --insecure
 
 #TODO: only at first node
 #./gen-cilium.sh

@@ -38,6 +38,7 @@ var initCmd = &cobra.Command{
 	},
 }
 
+// TODO: validate disk parameter does not include special characters (prevent injection of commands in shell)
 func init() {
 	initCmd.Flags().BoolVarP(&initCmdFlags.skipReboot, "skipReboot", "n", false, "skip reboot of server after enabling rescue system.")
 	initCmd.Flags().BoolVarP(&initCmdFlags.enableRescueSystem, "enable-rescue-system", "r", false, "entering rescue system even if rescue system already enabled. This will generate a new password.")

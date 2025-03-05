@@ -1,4 +1,3 @@
-
 hubble:
   enabled: true
   peerService:
@@ -23,3 +22,22 @@ hubble:
       enabled: true
       method: cronJob # generate certificates using hubble's hubblecertgen (check the hubblecertgen section for more details in cilium's helm values file)
       certValidityDuration: 1095
+
+
+cni:
+  install: true
+  chainingMode: "none"
+  exclusive: true
+daemon:
+  runAsUser: 0
+  runAsGroup: 0
+  enabled: true
+  # Disable AppArmor profile
+  apparmor:
+    enabled: false
+ipam:
+  mode: "kubernetes"
+#enableIPv4Masquerade: true
+#bpf:
+#  masquerade: true
+

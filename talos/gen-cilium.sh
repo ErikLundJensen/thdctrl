@@ -1,6 +1,7 @@
 helm template                                                   \
     cilium                                                      \
     cilium/cilium                                               \
+    --kube-version 1.29.13                                      \
     -f cilium-values.yaml                                       \
     --version 1.16.3                                            \
     --namespace kube-system                                     \
