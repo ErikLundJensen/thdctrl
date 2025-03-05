@@ -10,7 +10,7 @@ To build and install `thdctrl`, use the provided Dockerfile:
 
 ```sh
 docker build -t thdctrl .
-docker run --rm -v $(pwd):/root thdctrl
+docker run --rm -v $(pwd):/root thdctrl:latest /app/thdctrl --help
 ```
 
 ## Usage

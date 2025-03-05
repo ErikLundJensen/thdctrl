@@ -23,9 +23,9 @@ import (
 // ServerParameters are the configurable fields of a server.
 type ServerParameters struct {
 	ServerNumber    int    `json:"serverNumber"`
-	Disk            string `json:"disk"`
-	TalosVersion    string `json:"talosVersion"`
-	TalosImage      string `json:"talosImage"`
+	Disk            string `json:"disk,omitempty"`
+	TalosVersion    string `json:"talosVersion,omitempty"`
+	TalosImage      string `json:"talosImage,omitempty"`
 }
 
 // ServerObservation are the observable fields of a server.

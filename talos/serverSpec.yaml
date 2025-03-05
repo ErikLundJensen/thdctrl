@@ -1,0 +1,4 @@
+serverNumber: 12345
+disk: nvme0n1
+#talosVersion: "v1.9.2"
+#talsoImage: "some"

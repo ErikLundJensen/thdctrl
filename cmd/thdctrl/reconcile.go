@@ -9,7 +9,7 @@ import (
   "github.com/eriklundjensen/thdctrl/pkg/hetznerapi"
 	"github.com/eriklundjensen/thdctrl/pkg/robot"
 	"github.com/spf13/cobra"
-	yaml "gopkg.in/yaml.v2"
+	yaml "github.com/goccy/go-yaml"
 )
 
 var (
