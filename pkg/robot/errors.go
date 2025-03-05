@@ -8,7 +8,6 @@ type HTTPError struct {
 	Err        error
 }
 
-
 // Error implements the error interface
 func (e *HTTPError) Error() string {
 	if e.Err != nil {
