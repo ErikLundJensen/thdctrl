@@ -15,7 +15,13 @@ docker run --rm -v $(pwd):/root thdctrl:latest /app/thdctrl --help
 
 ## Usage
 
-Use `thdctrl --help` to get a list of available commands and arguments.
+Use `thdctrl --help` to get a list of available commands and arguments.  
+Username and password for the Hetzner Robot API must be set using environment variables:
+```
+export HETZNER_USERNAME='myAPIuser'
+export HETZNER_PASSWORD='password'
+```
+
 
 ### Commands
 
