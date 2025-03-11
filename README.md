@@ -4,9 +4,9 @@
 
 `thdctrl` is a command-line tool to manage Hetzner dedicated servers with Talos. It provides various commands to initialize, configure, and manage your servers.
 
-## Installation
+## Docker based
 
-To build and install `thdctrl`, use the provided Dockerfile:
+To build and run`thdctrl` use the provided Dockerfile:
 
 ```sh
 docker build -t thdctrl .
