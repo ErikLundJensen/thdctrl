@@ -9,7 +9,7 @@ import (
 )
 
 var getServerCmd = &cobra.Command{
-	Use:   "GetServer",
+	Use:   "getServer",
 	Short: "Get server details",
 	Args:  cobra.RangeArgs(1, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -31,8 +31,8 @@ func init() {
 func getServerDetails(client robot.Client, serverNumber int) error {
 	serverDetails, err := hetznerapi.GetServerDetails(client, serverNumber)
 	if err != nil {
-		fmt.Printf("Error getting server details: %v\n", err)
-		return err
+		fmt.Printf("Error getting server details: %v\n", err.Message)
+		return err.Err
 	}
 
 	fmt.Printf("ID: %d, Name: %s, Product: %s, Datacenter: %s, IPv4: %s, IPv6: %s\n",

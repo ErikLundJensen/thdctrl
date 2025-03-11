@@ -37,7 +37,7 @@ type Servers struct {
 	Servers Server `json:"server"`
 }
 
-func GetServerDetails(client robot.ClientInterface, serverNumber int) (*ServerDetails, error) {
+func GetServerDetails(client robot.ClientInterface, serverNumber int) (*ServerDetails, *robot.HTTPError) {
 	path := fmt.Sprintf("server/%d", serverNumber)
 
 	body, err := client.Get(path)
@@ -47,14 +47,14 @@ func GetServerDetails(client robot.ClientInterface, serverNumber int) (*ServerDe
 
 	var serverDetails ServerDetails
 	if err := json.Unmarshal(body, &serverDetails); err != nil {
-		return nil, fmt.Errorf("failed to decode response body: %w", err)
+		return nil,  &robot.HTTPError{ StatusCode: 0, Message: "failed to unmarshal response", Err: err }
 	}
 
 	return &serverDetails, nil
 }
 
 
-func ListServers(client robot.ClientInterface) ([]Server, error) {
+func ListServers(client robot.ClientInterface) ([]Server, *robot.HTTPError) {
 	path := "server"
 
 	body, err := client.Get(path)
@@ -64,13 +64,13 @@ func ListServers(client robot.ClientInterface) ([]Server, error) {
 
 	var servers []Server
 	if err := json.Unmarshal(body, &servers); err != nil {
-		return nil, fmt.Errorf("failed to decode response body: %w", err)
+		return nil, &robot.HTTPError{ StatusCode: 0, Message: "failed to unmarshal response", Err: err }
 	}
 
 	return servers, nil
 }
 
-func RebootServer(client robot.ClientInterface, serverNumber int) error {
+func RebootServer(client robot.ClientInterface, serverNumber int) *robot.HTTPError {
 	path := fmt.Sprintf("reset/%d", serverNumber)
 
 	data := url.Values{}

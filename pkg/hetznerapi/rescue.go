@@ -23,7 +23,7 @@ type Rescue struct {
 	Rescue RescueDetails `json:"rescue"`
 }
 
-func GetRescueSystemDetails(client robot.ClientInterface, serverNumber int) (*Rescue, error) {
+func GetRescueSystemDetails(client robot.ClientInterface, serverNumber int) (*Rescue, *robot.HTTPError) {
 	path := fmt.Sprintf("boot/%d/rescue", serverNumber)
 
 	body, err := client.Get(path)
@@ -33,13 +33,13 @@ func GetRescueSystemDetails(client robot.ClientInterface, serverNumber int) (*Re
 
 	var rescue Rescue
 	if err := json.Unmarshal(body, &rescue); err != nil {
-		return nil, fmt.Errorf("failed to decode response body: %w", err)
+		return nil, &robot.HTTPError{ StatusCode: 0, Message: "failed to unmarshal response", Err: err }
 	}
 
 	return &rescue, nil
 }
 
-func EnableRescueSystem(client robot.ClientInterface, serverNumber int) (*Rescue, error) {
+func EnableRescueSystem(client robot.ClientInterface, serverNumber int) (*Rescue, *robot.HTTPError) {
 	path := fmt.Sprintf("boot/%d/rescue", serverNumber)
 
 	data := url.Values{}
@@ -52,7 +52,7 @@ func EnableRescueSystem(client robot.ClientInterface, serverNumber int) (*Rescue
 
 	var rescue Rescue
 	if err := json.Unmarshal(body, &rescue); err != nil {
-		return nil, fmt.Errorf("failed to decode response body: %w", err)
+		return nil, &robot.HTTPError{ StatusCode: 0, Message: "failed to unmarshal response", Err: err }
 	}
 
 	fmt.Println("Parsed Response:", rescue)

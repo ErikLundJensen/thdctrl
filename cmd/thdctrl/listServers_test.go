@@ -14,7 +14,7 @@ type mockRobotClient struct {
 	shouldFail bool
 }
 
-func (m *mockRobotClient) Get(path string) ([]byte, error) {
+func (m *mockRobotClient) Get(path string) ([]byte, *robot.HTTPError) {
 	response := `[
 		{
 			"server": {
@@ -30,9 +30,9 @@ func (m *mockRobotClient) Get(path string) ([]byte, error) {
 	return []byte(response), nil
 }
 
-func (m *mockRobotClient) Post(path string, values url.Values) ([]byte, error) {
+func (m *mockRobotClient) Post(path string, values url.Values) ([]byte, *robot.HTTPError) {
 	if m.shouldFail {
-		return nil, errors.New("failed to reboot server")
+		return nil, &robot.HTTPError{ StatusCode: 0, Message: "", Err: errors.New("failed to reboot server")}
 	}
 	response := `{"status": "success"}`
 	return []byte(response), nil

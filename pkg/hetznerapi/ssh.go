@@ -80,6 +80,10 @@ func (client *SSHClient) ListDisks() (string, error) {
 	return client.ExecuteCommand("lsblk")
 }
 
+func (client *SSHClient) VerifyDiskExists(disk string) (string, error) {
+	return client.ExecuteCommand(fmt.Sprintf("lsblk | grep %s", disk))
+}
+
 func (client *SSHClient) InstallImage(disk string) (string, error) {
 	unpack := fmt.Sprintf("zstdcat -dv /tmp/talos.raw.xz >/dev/%s", disk)
 	return client.ExecuteCommand(unpack)
