@@ -7,6 +7,7 @@ import (
 
 	"github.com/eriklundjensen/thdctrl/pkg/hetznerapi"
 	"github.com/eriklundjensen/thdctrl/pkg/robot"
+	"github.com/eriklundjensen/thdctrl/pkg/validation"
 	"github.com/spf13/cobra"
 )
 
@@ -45,6 +46,9 @@ func init() {
 	initCmd.Flags().StringVarP(&initCmdFlags.disk, "disk", "d", "nvme0n1", "disk to use for installation of image.")
 	initCmd.Flags().StringVarP(&initCmdFlags.version, "version", "v", defaultTalosVersion, "Talos version.")
 	initCmd.Flags().StringVarP(&initCmdFlags.image, "image", "i", "", "Talos image URL. Don't use hcloud-amd64 image target Hetzner Cloud, use Talos 'metal' image instead.")
+	initCmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+		return validation.ValidateDiskName(initCmdFlags.disk)
+	}
 	addCommand(initCmd)
 }
 
@@ -73,7 +77,7 @@ func initializeServer(client robot.ClientInterface, sshClient hetznerapi.SSHClie
 		return err
 	}
 	sshClient.SetTargetHost(rescue.Rescue.ServerIP, "22")
-	
+
 	sshUser := "root"
 	if rescue.Rescue.Password != "" {
 		sshPassword = rescue.Rescue.Password
