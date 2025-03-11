@@ -1,7 +1,7 @@
 package thdctrl
 
 import (
-  "fmt"
+	"fmt"
 	"strconv"
 	"github.com/spf13/cobra"
 	"github.com/eriklundjensen/thdctrl/pkg/robot"
