@@ -1,5 +1,8 @@
 # Talos Hetzner Dedicated Control CLI - thdctrl
 
+This repository has been moved to https://github.com/ErikLundJensen/thdctl
+(renamed from thdctrl to thdctl)
+
 ## Overview
 
 `thdctrl` is a command-line tool to manage Hetzner dedicated servers with Talos. It provides various commands to initialize, configure, and manage your servers.
