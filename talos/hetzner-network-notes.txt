@@ -65,10 +65,6 @@ Network conclusion of 27/1
   Have not found the reason why it can't connect.
   Try to deploy more workload to the cluster to see if there is some generic network problem.
 
-TODO:
-* enable encryption
-* Does Cilium support host network policies? Is unencrypted traffic allowed?
-
 
 IPv6:
 * Single IPv6 stack is not really production ready.
