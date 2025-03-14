@@ -22,8 +22,11 @@ const (
 	// TalosImageInstalled indicates a Talos image has been successfully installed
 	TalosImageInstalled ServerStatus = "TalosImageInstalled"
 
-	// RescueModeReady indicates the rescue system is active and ready
-	RescueModeReady ServerStatus = "RescueModeReady"
+	// Wait from reboot after rescue mode is enabled
+	WaitForReboot ServerStatus = "WaitForReboot"
+
+	// Requires reboot after rescue mode is enabled
+	RequiresReboot ServerStatus = "RequiresReboot"
 
 	// RescueModeInitiated indicates rescue mode has been requested but not yet confirmed ready
 	RescueModeInitiated ServerStatus = "RescueModeInitiated"
@@ -83,19 +86,21 @@ func DetermineServerStatus(client robot.ClientInterface, sshClient hetznerapi.SS
 	host := rescue.Rescue.ServerIP
 	if rescue.Rescue.Active {
 		fmt.Println("Rescue system active")
-		// check if SSH is available
-		sshPassword := os.Getenv("HETZNER_SSH_PASSWORD") // Optional set Hetzner ssh password in environment variable
 
-		sshClient.SetTargetHost(host, "22")
-		sshUser := "root"
-		if rescue.Rescue.Password != "" {
-			sshPassword = rescue.Rescue.Password
-		}
-		sshClient.Auth(sshUser, sshPassword)
-		if err := sshClient.EstablishSSHSession(); err == nil {
-			return SSHAvailable
-		}
 		return RescueModeInitiated
+	}
+
+	// check if SSH is available
+	sshPassword := os.Getenv("HETZNER_SSH_PASSWORD") // Optional set Hetzner ssh password in environment variable
+
+	sshClient.SetTargetHost(host, "22")
+	sshUser := "root"
+	if rescue.Rescue.Password != "" {
+		sshPassword = rescue.Rescue.Password
+	}
+	sshClient.Auth(sshUser, sshPassword)
+	if err := sshClient.EstablishSSHSession(); err == nil {
+		return SSHAvailable
 	}
 
 	talosAPIAvailable, talosError := VerifyTalosAPIPort(host, 5)

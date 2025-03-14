@@ -101,13 +101,13 @@ func initializeServer(client robot.ClientInterface, sshClient hetznerapi.SSHClie
 
 	output, sshErr := sshClient.DownloadImage(imageUrl)
 	if sshErr != nil {
-		fmt.Printf("Failed to download image: %v, output %s\n", err, output)
+		fmt.Printf("Failed to download image: %v, output %s\n", sshErr, output)
 		return sshErr
 	}
 
 	output, sshErr = sshClient.InstallImage(f.disk)
 	if sshErr != nil {
-		fmt.Printf("Failed to install image: %v output %s\n", err, output)
+		fmt.Printf("Failed to install image: %v output %s\n", sshErr, output)
 		_, sshErr = sshClient.ListDisks()
 		return sshErr
 	}

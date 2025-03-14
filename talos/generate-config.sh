@@ -38,7 +38,7 @@ talosctl gen config \
         $CLUSTER_NAME                                             \
         https://${KUBERNETES_API_SERVER_ADDRESS}:${KUBERNETES_API_SERVER_PORT}
 
-talosctl -n ${NODE_01_IP} -e ${NODE_01_IP}  apply-config -f gen/c1.yaml --insecure
+#talosctl -n ${NODE_01_IP} -e ${NODE_01_IP}  apply-config -f gen/c1.yaml --insecure
 #talosctl -n  ${NODE_02_IP} -e ${NODE_02_IP} apply-config -f gen/c2.yaml --insecure
 
 #TODO: only at first node

@@ -9,8 +9,15 @@
 To build and run`thdctrl` use the provided Dockerfile:
 
 ```sh
-docker build -t thdctrl .
+make docker-build
+
 docker run --rm -v $(pwd):/root thdctrl:latest /app/thdctrl --help
+```
+
+## Build and run without Docker
+
+```sh
+make build
 ```
 
 ## Usage
@@ -22,12 +29,21 @@ export HETZNER_USERNAME='myAPIuser'
 export HETZNER_PASSWORD='password'
 ```
 
+There are two ways of installing Talos using this CLI:  
+
+* init
+* reconcile
+
+The init command install Talos at a clean server.  
+The reconcile command uses a server specification and reconcile the given specification.  
+
+The later command is intended for a crossplane provider, however, it can be used from command line as well.  
 
 ### Commands
 
 #### `init`
 
-Initialize Hetzner servers by using their server number.
+Initialize Hetzner dedicated server by using a Hetzner server number.
 
 ```sh
 thdctrl init <serverNumber>
@@ -39,11 +55,22 @@ Example:
 thdctrl init 123456
 ```
 
+### `reconsile`
 
-### Flags
+Example using the reconcile command: 
+
+```sh
+thdctrl reconcile -f talos/serverSpec.yaml
+```
+
+
+### Flags & Defaults
 
 - `--help`: Show help information for `thdctrl` commands.
 - `--version`: Show the version of `thdctrl`.
+
+The environment variable "HETZNET_SSH_PASSWORD" can be used if Hetzner Rescue API no longer returns the password. For example, when activating the rescue mode then the password is only available until the server reboots.
+
 
 ## Example Workflow
 
@@ -53,11 +80,20 @@ thdctrl init 123456
     thdctrl init 123456
     ```
 
+The remaning steps is regular Talos initialization. Below is just an overall description.  
+
 2. Wait for the API server to be ready, then apply the configuration:
 
     ```sh
+    cd talos
     . ./init-env-sh
     ./generate-config.sh
+    ```
+
+    Apply talos config:
+
+    ```sh
+    talosctl -n ${NODE_01_IP} -e ${NODE_01_IP}  apply-config -f gen/c1.yaml --insecure
     ```
 
 3. Wait for "waiting for bootstrap" and then bootstrap Talos:
@@ -97,16 +133,3 @@ thdctrl init 123456
     kubectl get pods -A
     ```
 
-## New Features
-
-- Get disk name during SSH sessions (e.g., if the disk is not specified in the command line).
-- Add a command to list disks and sizes.
-
-## TODO
-
-- Add shutdown command.
-- Change node-2 to a worker node.
-- Re-initialize nodes.
-- Add VIP address (in case of more control plane nodes).
-- Install Hetzner Load Balancer operator.
-- Test load balancer.
